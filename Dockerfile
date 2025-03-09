@@ -1,4 +1,4 @@
-FROM gradle:8.2.1-jdk17 AS builder
+FROM gradle:8.5-jdk17 AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN chmod +x gradlew
 
 RUN gradle build -x test
 
-FROM openjdk:17-jdk-alpine
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
