@@ -1,5 +1,6 @@
 package com.vkr.user_service.controller;
 
+import com.vkr.user_service.dto.CreateUserDto;
 import com.vkr.user_service.dto.UserDto;
 import com.vkr.user_service.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +42,13 @@ public class UserController {
     @Operation(summary = "Delete user")
     public void deleteUser(@PathVariable String username) {
         userService.deleteUser(username);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Save user")
+    public UserDto saveUser(@RequestBody CreateUserDto createUserDto) {
+        return userService.saveUser(createUserDto);
     }
 
 }

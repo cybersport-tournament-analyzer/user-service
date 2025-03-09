@@ -1,5 +1,6 @@
 package com.vkr.user_service.service;
 
+import com.vkr.user_service.dto.CreateUserDto;
 import com.vkr.user_service.dto.UserDto;
 import com.vkr.user_service.entity.User;
 import com.vkr.user_service.exception.UserNotFoundException;
@@ -52,11 +53,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public User getBySteamId(String steamId) {
+    public UserDto saveUser(CreateUserDto createUserDto) {
+        User user;
 
-        return userRepository.findBySteamId(steamId)
-                .orElseThrow(() -> new UserNotFoundException("steamId", steamId));
+        if(userRepository.findBySteamId(createUserDto.getSteamId()).isPresent()) {
+            user = userRepository.findBySteamId(createUserDto.getSteamId()).get();
+            userMapper.updateEntity(user, createUserDto);
+        } else {
+            user = userMapper.toEntity(createUserDto);
+        }
 
+        log.info("Saving user: {}", user);
+
+        return userMapper.toDto(userRepository.save(user));
     }
 }

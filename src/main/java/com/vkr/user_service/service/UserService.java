@@ -1,5 +1,6 @@
 package com.vkr.user_service.service;
 
+import com.vkr.user_service.dto.CreateUserDto;
 import com.vkr.user_service.dto.UserDto;
 import com.vkr.user_service.entity.User;
 import org.springframework.data.domain.Page;
@@ -16,5 +17,5 @@ public interface UserService {
 
     void deleteUser(String username);
 
-    User getBySteamId(String steamId);
+    UserDto saveUser(CreateUserDto createUserDto);
 }
