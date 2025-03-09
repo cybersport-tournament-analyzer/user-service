@@ -29,8 +29,8 @@ jobs:
       - name: Build and push Docker image
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/vkr-user-service:latest .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/vkr-user-service:latest
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/vkr-user-service:v1.0.0 .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/vkr-user-service:v1.0.0
 
   deploy:
     needs: build
@@ -60,14 +60,13 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
 
-          # Авторизация в Docker Hub на удалённом сервере
           ssh $REMOTE_USER@$REMOTE_HOST << EOF
             set -x
             echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
             cd $REMOTE_PATH
-            docker pull $DOCKER_HUB_USERNAME/vkr-user-service:latest
+            docker pull $DOCKER_HUB_USERNAME/vkr-user-service:v1.0.0
             docker stop vkr-user-service || true
             docker rm vkr-user-service || true
-            docker run --name vkr-user-service -d -p 8080:8080 -e CONFIG_HOST=$CONFIG_HOST -e CONFIG_GITHUB_LABEL=$CONFIG_GITHUB_LABEL -e EUREKA_HOST=$EUREKA_HOST $DOCKER_HUB_USERNAME/vkr-user-service:latest
+            docker run --name vkr-user-service -d -p 8080:8080 -e CONFIG_HOST=$CONFIG_HOST -e CONFIG_GITHUB_LABEL=$CONFIG_GITHUB_LABEL -e EUREKA_HOST=$EUREKA_HOST $DOCKER_HUB_USERNAME/vkr-user-service:v1.0.0
             exit
           EOF
