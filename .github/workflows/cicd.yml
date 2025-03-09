@@ -52,19 +52,22 @@ jobs:
           CONFIG_HOST: ${{ secrets.CONFIG_HOST }}
           EUREKA_HOST: ${{ secrets.EUREKA_HOST }}
           CONFIG_GITHUB_LABEL: ${{ secrets.CONFIG_GITHUB_LABEL }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
 
-          # Pull Docker image and run container
+          # Авторизация в Docker Hub на удалённом сервере
           ssh $REMOTE_USER@$REMOTE_HOST << EOF
             set -x
+            echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
             cd $REMOTE_PATH
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/vkr-user-service:latest
+            docker pull $DOCKER_HUB_USERNAME/vkr-user-service:latest
             docker stop vkr-user-service || true
             docker rm vkr-user-service || true
-            docker run --name vkr-user-service -d -p 8080:8080 -e CONFIG_HOST=$CONFIG_HOST -e CONFIG_GITHUB_LABEL=$CONFIG_GITHUB_LABEL -e EUREKA_HOST=$EUREKA_HOST ${{ secrets.DOCKER_HUB_USERNAME }}/vkr-user-service:latest
+            docker run --name vkr-user-service -d -p 8080:8080 -e CONFIG_HOST=$CONFIG_HOST -e CONFIG_GITHUB_LABEL=$CONFIG_GITHUB_LABEL -e EUREKA_HOST=$EUREKA_HOST $DOCKER_HUB_USERNAME/vkr-user-service:latest
             exit
           EOF
