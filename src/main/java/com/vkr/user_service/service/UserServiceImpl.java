@@ -22,11 +22,13 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(userMapper::toDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserByUsername(String username) {
         User user = findUserByUsername(username);
 
@@ -34,12 +36,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserBySteamId(String steamId) {
         return userRepository.findBySteamId(steamId).map(userMapper::toDto)
                 .orElseThrow(() -> new UserNotFoundException("steamId", steamId));
     }
 
     @Override
+    @Transactional
     public void deleteUser(String username) {
         User user = findUserByUsername(username);
 
@@ -53,6 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto saveUser(CreateUserDto createUserDto) {
         User user;
 
