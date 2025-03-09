@@ -59,10 +59,8 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
 
-          # Копируем Docker-образ на сервер
           scp ./vkr-user-service/vkr-user-service.tar $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH
 
-          # Загружаем Docker-образ и запускаем контейнер
           ssh $REMOTE_USER@$REMOTE_HOST << EOF
             set -x
             cd $REMOTE_PATH
