@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -49,6 +51,13 @@ public class UserController {
     @Operation(summary = "Save user")
     public UserDto saveUser(@RequestBody CreateUserDto createUserDto) {
         return userService.saveUser(createUserDto);
+    }
+
+    @GetMapping("/byIds")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Get list users by steamIds")
+    public List<UserDto> getUsersBySteamIds(@RequestBody List<String> steamIds){
+        return userService.getUsersByIds(steamIds);
     }
 
 }
