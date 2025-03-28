@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     public UserDto saveUser(CreateUserDto createUserDto) {
         User user;
 
-        if(userRepository.findBySteamId(createUserDto.getSteamId()).isPresent()) {
+        if (userRepository.findBySteamId(createUserDto.getSteamId()).isPresent()) {
             user = userRepository.findBySteamId(createUserDto.getSteamId()).get();
             userMapper.updateEntity(user, createUserDto);
         } else {
@@ -77,5 +77,18 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getAverageEloRating(List<String> steamIds, int playersNumber) {
+
+        double average = getUsersByIds(steamIds).stream()
+                .sorted(Comparator.comparingLong(UserDto::getRatingElo).reversed())
+                .limit(playersNumber)
+                .mapToLong(UserDto::getRatingElo)
+                .average()
+                .orElse(0.0);
+
+        return (int) Math.ceil(average);
     }
 }

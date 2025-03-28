@@ -22,4 +22,6 @@ public interface UserService {
     UserDto saveUser(CreateUserDto createUserDto);
 
     List<UserDto> getUsersByIds(List<String> steamIds);
+
+    int getAverageEloRating(List<String> steamIds, int playersNumber);
 }

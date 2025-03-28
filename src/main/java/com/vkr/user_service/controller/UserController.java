@@ -1,6 +1,8 @@
 package com.vkr.user_service.controller;
 
 import com.vkr.user_service.dto.CreateUserDto;
+import com.vkr.user_service.dto.GetAverageRatingByIdsDto;
+import com.vkr.user_service.dto.GetUsersByIdsDto;
 import com.vkr.user_service.dto.UserDto;
 import com.vkr.user_service.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,10 +56,17 @@ public class UserController {
     }
 
     @GetMapping("/byIds")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get list users by steamIds")
-    public List<UserDto> getUsersBySteamIds(@RequestBody List<String> steamIds){
-        return userService.getUsersByIds(steamIds);
+    public List<UserDto> getUsersBySteamIds(@RequestBody GetUsersByIdsDto dto) {
+        return userService.getUsersByIds(dto.getIds());
+    }
+
+    @PostMapping("/averageEloRating")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get average elo rating by ids")
+    public int getAverageRatingByIds(@RequestBody GetAverageRatingByIdsDto dto) {
+        return userService.getAverageEloRating(dto.getIds(), dto.getPlayersNumber());
     }
 
 }
