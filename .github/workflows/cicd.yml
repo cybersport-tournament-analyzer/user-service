@@ -1,0 +1,59 @@
+name: User Service Docker CICD
+
+on:
+  push:
+    branches:
+      - cicd
+  pull_request:
+    branches:
+      - cicd
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t vkr-user-service:latest .
+
+      - name: Set up SSH connection
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
+
+      - name: Save and transfer Docker image
+        run: |
+          docker save vkr-user-service:latest | ssh $REMOTE_USER@$REMOTE_HOST "docker load"
+
+      - name: Deploy on remote server
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          CONFIG_HOST: ${{ secrets.CONFIG_HOST }}
+          EUREKA_HOST: ${{ secrets.EUREKA_HOST }}
+          CONFIG_GITHUB_LABEL: ${{ secrets.CONFIG_GITHUB_LABEL }}
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST << EOF
+            set -x
+            docker stop vkr-user-service || true
+            docker rm vkr-user-service || true
+            docker run --name vkr-user-service -d -p 8080:8080 \
+              -e CONFIG_HOST=$CONFIG_HOST \
+              -e CONFIG_GITHUB_LABEL=$CONFIG_GITHUB_LABEL \
+              -e EUREKA_HOST=$EUREKA_HOST \
+              vkr-user-service:latest
+            exit
+          EOF
